@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="app_name">Lab1</string>
-    <string name="input_color_hint">Введите цвет</string>
-    <string name="back">Назад</string>
-    <string name="empty_field">Пустое поле ввода</string>
-    <string name="unsupported_color">Неподдерживаемый цвет</string>
-</resources>

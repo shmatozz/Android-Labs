@@ -1,7 +1,0 @@
-<resources>
-    <string name="app_name" translatable="false">Lab1</string>
-    <string name="input_color_hint">Enter color</string>
-    <string name="back">Back</string>
-    <string name="empty_field">Empty input field</string>
-    <string name="unsupported_color">Unsupported color</string>
-</resources>
