@@ -5,4 +5,5 @@
     <string name="back">Назад</string>
     <string name="empty_field">Пустое поле ввода</string>
     <string name="unsupported_color">Неподдерживаемый цвет</string>
+    <string name="choose_color">Выберите цвет: %1$s, %2$s, %3$s</string>
 </resources>

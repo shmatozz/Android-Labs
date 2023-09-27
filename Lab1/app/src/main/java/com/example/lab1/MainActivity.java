@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -15,18 +16,22 @@ import java.util.Objects;
 
 public class MainActivity extends Activity {
 
-    String[] colors = new String[] {"green", "red", "blue"};
+    String[] colors = new String[] { "green", "blue", "red" };
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Log.d("WORKING", "starting main activity");
+
         Button ok_btn = findViewById(R.id.to_colored);
         EditText editText = findViewById(R.id.input_field);
+        TextView textView = findViewById(R.id.info_text);
+        textView.setText(getResources().getString(R.string.choose_color, "green", "blue", "red"));
 
         ok_btn.setOnClickListener(view -> {
-            String color = String.valueOf(editText.getText()).toLowerCase();
+            String color = String.valueOf(editText.getText()).toLowerCase().trim();
 
             Log.d("WORKING", "get color: " + color);
 
