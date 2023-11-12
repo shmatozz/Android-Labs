@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Lab2</string>
+    <string name="first_fragment_label">Первый</string>
+    <string name="second_fragment_label">Второй</string>
+    <string name="next">Следующий</string>
+    <string name="previous">Предыдущий</string>
+    <string name="lorem_ipsum">...</string>
+    <string name="app_title">Список покупок</string>
+    <string name="create">Создать</string>
+    <string name="delete">Удалить все</string>
+    <string name="title">Название списка</string>
+    <string name="items_count">Товаров: %1$d</string>
+    <string name="new_title_hint">Введите название</string>
+    <string name="item_name">Название вещи</string>
+    <string name="exist_list">Название уже существует</string>
+</resources>
