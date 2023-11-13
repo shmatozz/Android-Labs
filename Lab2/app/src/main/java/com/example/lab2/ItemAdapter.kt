@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.lab2.databinding.ItemCardBinding
 
-class ItemAdapter(val listener: Listener): RecyclerView.Adapter<ItemAdapter.ItemHolder>() {
+class ItemAdapter(private val listener: Listener): RecyclerView.Adapter<ItemAdapter.ItemHolder>() {
 
     val items = ArrayList<Item>()
 
@@ -15,22 +15,29 @@ class ItemAdapter(val listener: Listener): RecyclerView.Adapter<ItemAdapter.Item
         private val binding = ItemCardBinding.bind(item)
 
         fun bind(item: Item, listener: Listener) = with(binding) {
-            if (item.title.isNotEmpty()) {
-                itemName.text = item.title
+            itemName.text = item.title
 
-                deleteItemButton.setOnClickListener {
-                    listener.onDeleteItemClick(item)
-                }
+            changeItemStyle(item)
 
-                checkItem.setOnClickListener {
-                    if (checkItem.isChecked) {
-                        binding.itemName.paintFlags = Paint.STRIKE_THRU_TEXT_FLAG
-                        binding.background.alpha = 0.4F
-                    } else {
-                        binding.itemName.paintFlags = binding.itemName.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
-                        binding.background.alpha = 1F
-                    }
-                }
+            deleteItemButton.setOnClickListener {
+                listener.onDeleteItemClick(item)
+            }
+
+            checkItem.setOnClickListener {
+                item.isBought = !item.isBought
+                changeItemStyle(item)
+            }
+        }
+
+        private fun changeItemStyle(item: Item) = with(binding) {
+            if (item.isBought) {
+                itemName.paintFlags = Paint.STRIKE_THRU_TEXT_FLAG
+                background.alpha = 0.4F
+                checkItem.isChecked = true
+            } else {
+                itemName.paintFlags = itemName.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
+                background.alpha = 1F
+                checkItem.isChecked = false
             }
         }
     }
@@ -52,13 +59,6 @@ class ItemAdapter(val listener: Listener): RecyclerView.Adapter<ItemAdapter.Item
     fun addItem(item: Item) {
         items.add(item)
         notifyDataSetChanged()
-    }
-
-    fun deleteItem() {
-        if (items.size > 0) {
-            items.removeLast()
-            notifyDataSetChanged()
-        }
     }
 
     fun deleteItem(item: Item) {
