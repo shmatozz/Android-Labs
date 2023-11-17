@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.lab2.databinding.ListCardBinding
 
-class ListAdapter(val listener: Listener): RecyclerView.Adapter<ListAdapter.ListHolder>() {
+class ListAdapter(private val listener: Listener): RecyclerView.Adapter<ListAdapter.ListHolder>() {
 
     val lists = ArrayList<List>()
 
@@ -14,7 +14,8 @@ class ListAdapter(val listener: Listener): RecyclerView.Adapter<ListAdapter.List
         private val binding = ListCardBinding.bind(item)
         fun bind(list: List, listener: Listener) = with(binding) {
             listTitle.text = list.title
-            listItems.text = listItems.text.toString().format(list.goods.size)
+            val itemsCount = "${listItems.text.subSequence(0, listItems.text.lastIndexOf(' '))} ${list.goods.size}"
+            listItems.text = itemsCount
 
             itemView.setOnClickListener {
                 listener.onClick(list)

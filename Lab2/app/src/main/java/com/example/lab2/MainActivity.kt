@@ -39,6 +39,11 @@ class MainActivity : AppCompatActivity(), ListAdapter.Listener {
         listsDB = openOrCreateDatabase("lists.db", MODE_PRIVATE, null)
     }
 
+    override fun onResume() {
+        super.onResume()
+        loadLists()
+    }
+
     private fun loadLists() {
         while (adapter.lists.size > 0) {
             adapter.deleteList()
@@ -176,12 +181,6 @@ class MainActivity : AppCompatActivity(), ListAdapter.Listener {
 
     override fun onDestroy() {
         super.onDestroy()
-
         listsDB.close()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        loadLists()
     }
 }
