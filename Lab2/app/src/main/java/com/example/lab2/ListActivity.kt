@@ -1,6 +1,8 @@
 package com.example.lab2
 
 import android.app.Dialog
+import android.content.ContentValues
+import android.database.sqlite.SQLiteDatabase
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -14,6 +16,8 @@ class ListActivity : AppCompatActivity(), ItemAdapter.Listener {
 
     private lateinit var binding: ActivityListBinding
     private val adapter = ItemAdapter(this)
+    private lateinit var listsDB: SQLiteDatabase
+    private var listID = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,6 +32,9 @@ class ListActivity : AppCompatActivity(), ItemAdapter.Listener {
 
         val intent = intent
         val listInfo = intent.getSerializableExtra("list") as List
+
+        listsDB = openOrCreateDatabase("lists.db", MODE_PRIVATE, null)
+        listID = getListID(listInfo)
 
         loadListInfo(listInfo)
 
@@ -76,6 +83,27 @@ class ListActivity : AppCompatActivity(), ItemAdapter.Listener {
         }
     }
 
+    private fun addItemToDB(item: Item) {
+        val newItem = ContentValues()
+        newItem.put("id", listID)
+        newItem.put("title", item.title)
+        when (item.isBought) {
+            true -> newItem.put("bought", 1)
+            else -> newItem.put("bought", 0)
+        }
+        listsDB.insert("items", null, newItem)
+    }
+
+    private fun getListID(list: List) : Int {
+        val cursor = listsDB.rawQuery(
+            "select id from lists where title = \"${list.title}\"", null)
+        cursor.moveToFirst()
+        val id = cursor.getInt(0)
+
+        cursor.close()
+        return id
+    }
+
     override fun onDeleteItemClick(item: Item) {
         adapter.deleteItem(item)
     }
@@ -87,5 +115,20 @@ class ListActivity : AppCompatActivity(), ItemAdapter.Listener {
             }
         }
         return true
+    }
+
+    override fun onPause() {
+        super.onPause()
+
+        listsDB.delete("items", "id = $listID", null)
+
+        for (item in adapter.items) {
+            addItemToDB(item)
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        listsDB.close()
     }
 }

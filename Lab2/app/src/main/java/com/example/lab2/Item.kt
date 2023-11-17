@@ -1,3 +1,5 @@
 package com.example.lab2
 
-data class Item(val title: String, var isBought: Boolean = false)
+import java.io.Serializable
+
+data class Item(val title: String, var isBought: Boolean = false) : Serializable
