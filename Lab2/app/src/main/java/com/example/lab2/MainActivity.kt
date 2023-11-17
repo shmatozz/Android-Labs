@@ -1,7 +1,9 @@
 package com.example.lab2
 
 import android.app.Dialog
+import android.content.ContentValues
 import android.content.Intent
+import android.database.sqlite.SQLiteDatabase
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -17,6 +19,7 @@ class MainActivity : AppCompatActivity(), ListAdapter.Listener {
 
     private lateinit var binding: ActivityMainBinding
     private val adapter = ListAdapter(this)
+    private lateinit var listsDB: SQLiteDatabase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,6 +35,43 @@ class MainActivity : AppCompatActivity(), ListAdapter.Listener {
         binding.addList.setOnClickListener {
             createNewList()
         }
+
+        listsDB = openOrCreateDatabase("lists.db", MODE_PRIVATE, null)
+
+        loadLists()
+    }
+
+    private fun loadLists() {
+        listsDB.execSQL(
+            "CREATE TABLE IF NOT EXISTS lists (id integer primary key AUTOINCREMENT, title TEXT(16) unique)" )
+
+        listsDB.execSQL(
+            "CREATE TABLE IF NOT EXISTS items (id integer, title text(16))" )
+
+        val cursor = listsDB.rawQuery(
+            "select lists.title as list_title, items.title as item_title from lists LEFT JOIN items ON lists.id = items.id", null)
+
+        var currentListTitle = ""
+        val currentListItems: MutableList<Item> = mutableListOf()
+        while (cursor.moveToNext()) {
+            val receivedListTitle = cursor.getString(0)
+            val receivedItemTitle = cursor.getString(1)
+            if (receivedListTitle != currentListTitle) {
+                if (currentListTitle != "") {
+                    adapter.addList(List(currentListTitle, currentListItems.toTypedArray()))
+                }
+                currentListTitle = receivedListTitle
+            }
+            if (receivedItemTitle != null) {
+                currentListItems.add(Item(receivedItemTitle))
+            }
+        }
+
+        if (currentListTitle != "") {
+            adapter.addList(List(currentListTitle, currentListItems.toTypedArray()))
+        }
+
+        cursor.close()
     }
 
 
@@ -49,6 +89,7 @@ class MainActivity : AppCompatActivity(), ListAdapter.Listener {
             if (isUnique(newListTitle)) {
                 val newList = List(newListTitle)
                 adapter.addList(newList)
+                addListToDB(newList)
                 openList(newList)
                 addDialog.dismiss()
             } else {
@@ -65,6 +106,12 @@ class MainActivity : AppCompatActivity(), ListAdapter.Listener {
         onClick(newList)
     }
 
+    private fun addListToDB(list: List) {
+        val newList = ContentValues()
+        newList.put("title", list.title)
+        listsDB.insert("lists", null, newList)
+    }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
         return true
@@ -79,6 +126,7 @@ class MainActivity : AppCompatActivity(), ListAdapter.Listener {
 
     private fun deleteAllLists() : Boolean {
         while (adapter.lists.size > 0) {
+            deleteListFromDB(adapter.lists.last())
             adapter.deleteList()
         }
 
@@ -93,7 +141,20 @@ class MainActivity : AppCompatActivity(), ListAdapter.Listener {
     }
 
     override fun onDeleteButtonClick(list: List) {
+        deleteListFromDB(list)
         adapter.deleteList(list)
+    }
+
+    private fun deleteListFromDB(list: List) {
+        val cursor = listsDB.rawQuery(
+            "select id from lists where title = \"${list.title}\"", null)
+        cursor.moveToFirst()
+        val idToDelete = cursor.getInt(0)
+        cursor.close()
+
+        listsDB.delete("lists", "id = $idToDelete", null)
+        listsDB.delete("items", "title = " +
+                "$idToDelete", null)
     }
 
     private fun isUnique(title: String) : Boolean {
@@ -103,5 +164,11 @@ class MainActivity : AppCompatActivity(), ListAdapter.Listener {
             }
         }
         return true
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        listsDB.close()
     }
 }
