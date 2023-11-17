@@ -37,33 +37,41 @@ class MainActivity : AppCompatActivity(), ListAdapter.Listener {
         }
 
         listsDB = openOrCreateDatabase("lists.db", MODE_PRIVATE, null)
-
-        loadLists()
     }
 
     private fun loadLists() {
+        while (adapter.lists.size > 0) {
+            adapter.deleteList()
+        }
+
         listsDB.execSQL(
             "CREATE TABLE IF NOT EXISTS lists (id integer primary key AUTOINCREMENT, title TEXT(16) unique)" )
 
         listsDB.execSQL(
-            "CREATE TABLE IF NOT EXISTS items (id integer, title text(16))" )
+            "CREATE TABLE IF NOT EXISTS items (id integer, title text(16), bought integer default 0)" )
 
         val cursor = listsDB.rawQuery(
-            "select lists.title as list_title, items.title as item_title from lists LEFT JOIN items ON lists.id = items.id", null)
+            "select lists.title as list_title, items.title as item_title, bought from lists LEFT JOIN items ON lists.id = items.id", null)
 
         var currentListTitle = ""
-        val currentListItems: MutableList<Item> = mutableListOf()
+        var currentListItems: MutableList<Item> = mutableListOf()
         while (cursor.moveToNext()) {
             val receivedListTitle = cursor.getString(0)
             val receivedItemTitle = cursor.getString(1)
+            val receivedItemStatus = cursor.getInt(2)
             if (receivedListTitle != currentListTitle) {
                 if (currentListTitle != "") {
                     adapter.addList(List(currentListTitle, currentListItems.toTypedArray()))
+                    currentListItems = mutableListOf()
                 }
                 currentListTitle = receivedListTitle
             }
             if (receivedItemTitle != null) {
-                currentListItems.add(Item(receivedItemTitle))
+                if (receivedItemStatus == 0) {
+                    currentListItems.add(Item(receivedItemTitle, false))
+                } else {
+                    currentListItems.add(Item(receivedItemTitle, true))
+                }
             }
         }
 
@@ -170,5 +178,10 @@ class MainActivity : AppCompatActivity(), ListAdapter.Listener {
         super.onDestroy()
 
         listsDB.close()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        loadLists()
     }
 }
