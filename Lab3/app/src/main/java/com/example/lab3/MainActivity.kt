@@ -1,10 +1,17 @@
 package com.example.lab3
 
+import android.app.Dialog
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.util.Log
+import android.widget.Button
+import android.widget.CheckBox
+import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Call
@@ -17,6 +24,12 @@ class MainActivity : AppCompatActivity(), NewsAdapter.Listener {
 
     private val currentNewsList: MutableList<Article> = mutableListOf()
     private val newsAdapter = NewsAdapter(this)
+    private val myApiKey = "pub_346062ac4e5d9e57120fd5f7519f6f65efab8"
+    private val retrofit = RetrofitClient.getInstance()
+    private val newsAPI = retrofit.create(NewsAPI::class.java)
+    private var keyword = ""
+    private var ru = false
+    private var en = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,10 +37,71 @@ class MainActivity : AppCompatActivity(), NewsAdapter.Listener {
 
         Log.d("working", "start")
 
-        val retrofit = RetrofitClient.getInstance()
-        val newsAPI = retrofit.create(NewsAPI::class.java)
+        if (currentNewsList.isEmpty()) {
+            getNews()
+        } else {
+            outputNewsList()
+        }
 
-        val call = newsAPI.getAllNews("pub_346062ac4e5d9e57120fd5f7519f6f65efab8")
+        val newsSearch = findViewById<FloatingActionButton>(R.id.find_news)
+
+        newsSearch.setOnClickListener {
+            openNewsFilterDialog()
+        }
+    }
+
+    private fun openNewsFilterDialog() {
+        val newsFilterDialog = Dialog(this)
+        newsFilterDialog.setContentView(R.layout.dialog_filter_news)
+        newsFilterDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        newsFilterDialog.setCancelable(true)
+
+        val searchButton: Button = newsFilterDialog.findViewById(R.id.search_button)
+        val ruLang: CheckBox = newsFilterDialog.findViewById(R.id.ru_checkbox)
+        val enLang: CheckBox = newsFilterDialog.findViewById(R.id.en_checkbox)
+        val keyWordInput: EditText = newsFilterDialog.findViewById(R.id.key_word_input)
+
+        searchButton.setOnClickListener {
+            ru = ruLang.isChecked
+            en = enLang.isChecked
+            keyword = keyWordInput.text.toString()
+
+            getNews()
+            newsFilterDialog.dismiss()
+            newsAdapter.clearNews()
+            currentNewsList.clear()
+        }
+
+        newsFilterDialog.show()
+    }
+
+    private fun outputNewsList() {
+        val newsRV = findViewById<RecyclerView>(R.id.list_of_news)
+        newsRV.adapter = newsAdapter
+        newsRV.layoutManager = LinearLayoutManager(this)
+
+        Log.d("working", currentNewsList.size.toString())
+        for (article in currentNewsList) {
+            newsAdapter.addArticle(article)
+        }
+    }
+
+    private fun getNews() {
+        val call: Call<ResponseArticle> =
+            if (keyword.isEmpty() && !en && !ru) {
+                newsAPI.getAllNews(myApiKey)
+            } else if (keyword.isNotEmpty() && !en && !ru) {
+                newsAPI.getKeyNews(myApiKey, keyword)
+            } else if (en && !ru) {
+                if (keyword.isEmpty()) newsAPI.getAllLangNews(myApiKey,"en")
+                else newsAPI.getKeyLangNews(myApiKey, keyword, "en")
+            } else if (!en && ru) {
+                if (keyword.isEmpty()) newsAPI.getAllLangNews(myApiKey, "ru")
+                else newsAPI.getKeyLangNews(myApiKey, keyword, "ru")
+            } else {
+                if (keyword.isEmpty()) newsAPI.getAllLangNews(myApiKey, "ru,en")
+                else newsAPI.getKeyLangNews(myApiKey, keyword, "ru,en")
+            }
 
         call.enqueue(object : Callback<ResponseArticle> {
             override fun onResponse(
@@ -37,7 +111,7 @@ class MainActivity : AppCompatActivity(), NewsAdapter.Listener {
                 if (response.isSuccessful) {
                     val newsList = response.body()
                     newsList?.let {
-                        for (i in 0..9) {
+                        for (i in 0 until minOf(10, it.results.size)) {
                             val news = it.results[i]
                             currentNewsList.add(Article(news.title, news.link))
                         }
@@ -53,17 +127,6 @@ class MainActivity : AppCompatActivity(), NewsAdapter.Listener {
                 throw t
             }
         })
-    }
-
-    private fun outputNewsList() {
-        val newsRV = findViewById<RecyclerView>(R.id.list_of_news)
-        newsRV.adapter = newsAdapter
-        newsRV.layoutManager = LinearLayoutManager(this)
-
-        Log.d("working", currentNewsList.size.toString())
-        for (article in currentNewsList) {
-            newsAdapter.addArticle(article)
-        }
     }
 
     object RetrofitClient {
@@ -83,10 +146,10 @@ class MainActivity : AppCompatActivity(), NewsAdapter.Listener {
     }
 
     override fun onClick(article: Article) {
-        TODO("Not yet implemented")
+
     }
 
     override fun onLongClick(article: Article) {
-        TODO("Not yet implemented")
+
     }
 }
