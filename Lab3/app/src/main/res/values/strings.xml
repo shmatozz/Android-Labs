@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Latest News</string>
+    <string name="key_word">Key word</string>
+    <string name="english">English</string>
+    <string name="russian">Russian</string>
+    <string name="language">Language of news</string>
+    <string name="search">Search</string>
+    <string name="open_source">Open source</string>
+    <string name="placeholder" translatable="false">REPLACE ME</string>
+    <string name="no_title">No title provided</string>
+    <string name="no_description">No description provided</string>
+    <string name="no_date">No date provided</string>
+</resources>
