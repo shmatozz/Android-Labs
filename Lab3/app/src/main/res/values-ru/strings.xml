@@ -6,4 +6,8 @@
     <string name="russian">Русский</string>
     <string name="language">Язык новостей</string>
     <string name="search">Найти</string>
+    <string name="open_source">Открыть источник</string>
+    <string name="no_title">Нет заголовка</string>
+    <string name="no_description">Нет описания</string>
+    <string name="no_date">Нет даты</string>
 </resources>

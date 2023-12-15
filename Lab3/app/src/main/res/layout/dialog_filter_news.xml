@@ -70,7 +70,7 @@
             android:fontFamily="sans-serif-condensed-medium"
             android:text="@string/language"
             android:textColor="@color/brown"
-            android:textSize="30sp"
+            android:textSize="26sp"
             app:layout_constraintBottom_toTopOf="@+id/en_checkbox"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

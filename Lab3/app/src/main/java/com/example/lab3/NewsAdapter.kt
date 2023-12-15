@@ -14,7 +14,7 @@ class NewsAdapter(private val listener: Listener): RecyclerView.Adapter<NewsAdap
     class NewsHolder(item: View): RecyclerView.ViewHolder(item) {
         private val binding = CardArticleBinding.bind(item)
         fun bind(article: Article, listener: Listener) = with(binding) {
-            Log.d("working", article.title)
+            article.title?.let { Log.d("working", it) }
             articleTitle.text = article.title
 
             itemView.setOnClickListener {

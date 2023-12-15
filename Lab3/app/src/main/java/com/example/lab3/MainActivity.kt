@@ -1,8 +1,10 @@
 package com.example.lab3
 
 import android.app.Dialog
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
@@ -113,7 +115,10 @@ class MainActivity : AppCompatActivity(), NewsAdapter.Listener {
                     newsList?.let {
                         for (i in 0 until minOf(10, it.results.size)) {
                             val news = it.results[i]
-                            currentNewsList.add(Article(news.title, news.link))
+                            currentNewsList.add(Article(news.title,
+                                                        news.link,
+                                                        news.description,
+                                                        news.pubDate))
                         }
                     }
                     outputNewsList()
@@ -146,10 +151,17 @@ class MainActivity : AppCompatActivity(), NewsAdapter.Listener {
     }
 
     override fun onClick(article: Article) {
-
+        val intent = Intent(this, ArticleActivity::class.java).apply {
+            putExtra("title", article.title)
+            putExtra("link", article.link)
+            putExtra("description", article.description)
+            putExtra("pubDate", article.pubDate)
+        }
+        startActivity(intent)
     }
 
     override fun onLongClick(article: Article) {
-
+        val sourceIntent = Intent(Intent.ACTION_VIEW, Uri.parse(article.link))
+        startActivity(sourceIntent)
     }
 }
