@@ -9,7 +9,7 @@ import com.example.lab3.databinding.CardArticleBinding
 
 class NewsAdapter(private val listener: Listener): RecyclerView.Adapter<NewsAdapter.NewsHolder>() {
 
-    private val news = ArrayList<Article>()
+    val news = ArrayList<Article>()
 
     class NewsHolder(item: View): RecyclerView.ViewHolder(item) {
         private val binding = CardArticleBinding.bind(item)

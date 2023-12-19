@@ -37,6 +37,7 @@
             android:fontFamily="sans-serif-condensed-medium"
             android:text="@string/placeholder"
             android:textAlignment="textStart"
+            android:textColor="@color/black"
             android:textSize="24sp"
             app:layout_constraintBottom_toTopOf="@+id/article_description"
             app:layout_constraintEnd_toEndOf="parent"

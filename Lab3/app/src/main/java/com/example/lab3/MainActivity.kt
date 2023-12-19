@@ -24,7 +24,6 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class MainActivity : AppCompatActivity(), NewsAdapter.Listener {
 
-    private val currentNewsList: MutableList<Article> = mutableListOf()
     private val newsAdapter = NewsAdapter(this)
     private val myApiKey = "pub_346062ac4e5d9e57120fd5f7519f6f65efab8"
     private val retrofit = RetrofitClient.getInstance()
@@ -39,13 +38,12 @@ class MainActivity : AppCompatActivity(), NewsAdapter.Listener {
 
         Log.d("working", "start")
 
-        if (currentNewsList.isEmpty()) {
-            getNews()
-        } else {
-            outputNewsList()
-        }
+        getNews()
 
         val newsSearch = findViewById<FloatingActionButton>(R.id.find_news)
+        val newsRV = findViewById<RecyclerView>(R.id.list_of_news)
+        newsRV.adapter = newsAdapter
+        newsRV.layoutManager = LinearLayoutManager(this)
 
         newsSearch.setOnClickListener {
             openNewsFilterDialog()
@@ -68,24 +66,12 @@ class MainActivity : AppCompatActivity(), NewsAdapter.Listener {
             en = enLang.isChecked
             keyword = keyWordInput.text.toString()
 
+            newsAdapter.clearNews()
             getNews()
             newsFilterDialog.dismiss()
-            newsAdapter.clearNews()
-            currentNewsList.clear()
         }
 
         newsFilterDialog.show()
-    }
-
-    private fun outputNewsList() {
-        val newsRV = findViewById<RecyclerView>(R.id.list_of_news)
-        newsRV.adapter = newsAdapter
-        newsRV.layoutManager = LinearLayoutManager(this)
-
-        Log.d("working", currentNewsList.size.toString())
-        for (article in currentNewsList) {
-            newsAdapter.addArticle(article)
-        }
     }
 
     private fun getNews() {
@@ -113,15 +99,18 @@ class MainActivity : AppCompatActivity(), NewsAdapter.Listener {
                 if (response.isSuccessful) {
                     val newsList = response.body()
                     newsList?.let {
-                        for (i in 0 until minOf(10, it.results.size)) {
-                            val news = it.results[i]
-                            currentNewsList.add(Article(news.title,
-                                                        news.link,
-                                                        news.description,
-                                                        news.pubDate))
+                        if (it.results.isEmpty()) {
+                            newsAdapter.addArticle(Article("No results", "", "", ""))
+                        } else {
+                            for (i in 0 until it.results.size) {
+                                val news = it.results[i]
+                                newsAdapter.addArticle(Article(news.title,
+                                                               news.link,
+                                                               news.description,
+                                                               news.pubDate))
+                            }
                         }
                     }
-                    outputNewsList()
                 } else {
                     Log.d("working", "response code failure ${response.code()}")
                 }
